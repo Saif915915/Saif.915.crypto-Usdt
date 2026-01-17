@@ -10,31 +10,42 @@ body {
   font-family: Arial, sans-serif;
   direction: rtl;
   margin: 0;
+  padding: 0;
+  min-height: 100vh;
   background:
     linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
-    radial-gradient(circle at bottom, #ff8c00, #b22222, #2b1b0e);
-  min-height: 100vh;
+    url('https://i.imgur.com/qyQ1S5r.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
 }
 
 header {
   background: rgba(20,40,80,.85);
-  color: white;
   text-align: center;
-  padding: 20px;
+  padding: 25px 10px;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 main {
   max-width: 900px;
-  margin: auto;
-  padding: 20px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .box {
-  background: rgba(255,255,255,.9);
+  background: rgba(0,0,0,.6);
   padding: 20px;
   border-radius: 15px;
-  margin-bottom: 20px;
-  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,.5);
+}
+
+h2 {
+  margin-top: 0;
+  color: #ffcc00;
+  font-size: 20px;
 }
 
 button {
@@ -42,21 +53,56 @@ button {
   margin: 6px;
   border: none;
   border-radius: 8px;
+  cursor: pointer;
   background: #1e90ff;
   color: white;
-  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
 }
 
-#mineBtn {
-  background: #c45a00;
-  font-size: 18px;
+button:hover {
+  background: #0f6fc5;
+}
+
+#start, #stop {
+  width: 100px;
+}
+
+.mine-shaft {
+  width: 200px;
+  height: 200px;
+  margin: 20px auto;
+  background: linear-gradient(#6b4f3d, #3a261a);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffd700;
+  cursor: pointer;
+  box-shadow: inset 0 0 20px rgba(0,0,0,.5), 0 6px 15px rgba(0,0,0,.3);
+  transition: transform 0.1s;
+}
+
+.mine-shaft:active {
+  transform: translateY(4px);
+  box-shadow: inset 0 0 10px rgba(0,0,0,.7), 0 4px 8px rgba(0,0,0,.3);
 }
 
 footer {
-  background: rgba(0,0,0,.6);
-  color: white;
   text-align: center;
   padding: 15px;
+  background: rgba(0,0,0,.7);
+  font-size: 12px;
+  color: #ccc;
+}
+
+.warning {
+  font-size: 13px;
+  color: #ff9999;
+  text-align: center;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -64,41 +110,82 @@ footer {
 <body>
 
 <header>
-<h1>🎮 لعبة تعدين USDT</h1>
+🎮 لعبة تعدين USDT التعليمية
 </header>
 
 <main>
 
 <div class="box">
-<h2>🔐 المحفظة</h2>
-<p id="wallet">غير متصل</p>
-<button id="connect">ربط MetaMask</button>
+  <h2>🔐 المحفظة</h2>
+  <p>العنوان: <strong><span id="wallet">غير متصل</span></strong></p>
+  <button id="connect">ربط MetaMask</button>
 </div>
 
 <div class="box">
-<h2>📊 مستواك</h2>
-<p>المستوى: <strong><span id="level">1</span></strong></p>
-<p>USDT: <strong><span id="usdt">0</span></strong></p>
-<p>الهدف القادم: <span id="target">5</span> USDT</p>
+  <h2>📊 مستواك</h2>
+  <p>المستوى: <strong><span id="level">1</span></strong></p>
+  <p>USDT: <strong><span id="usdt">0</span></strong></p>
+  <p>الهدف القادم: <span id="target">5</span> USDT</p>
 </div>
 
 <div class="box">
-<h2>⛏ التعدين التلقائي</h2>
-<p>السرعة: <span id="speed">0.02</span> USDT / ثانية</p>
-<button id="start">بدء</button>
-<button id="stop">إيقاف</button>
+  <h2>⛏ التعدين التلقائي</h2>
+  <p>السرعة: <span id="speed">0.02</span> USDT / ثانية</p>
+  <button id="start">بدء</button>
+  <button id="stop">إيقاف</button>
 </div>
 
 <div class="box">
-<h2>🎮 لعبة التعدين</h2>
-<button id="mineBtn">⛏ اضغط للتعدين</button>
+  <h2>🎮 منجم التعدين</h2>
+  <div id="mineBtn" class="mine-shaft">
+    <span>⛏ احفر هنا!</span>
+  </div>
+</div>
+
+<div class="warning">
+⚠️ هذا الموقع تعليمي فقط. العملة افتراضية ولا تمثل USDT الحقيقي.
 </div>
 
 </main>
 
 <footer>
-USDT افتراضي – مشروع تعليمي
+مشروع تعليمي – لعبة Web3
 </footer>
+
+<!-- Modal التهنئة -->
+<div id="levelModal" style="
+    display:none;
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.7);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+">
+  <div style="
+      background:#222;
+      padding:30px;
+      border-radius:15px;
+      text-align:center;
+      max-width:300px;
+      color:#fff;
+      box-shadow:0 8px 25px rgba(0,0,0,0.6);
+  ">
+    <h2 id="modalTitle">🎉 تهانينا!</h2>
+    <p id="modalMsg">لقد وصلت لمستوى جديد!</p>
+    <button id="closeModal" style="
+        padding:10px 20px;
+        margin-top:15px;
+        border:none;
+        border-radius:8px;
+        background:#1e90ff;
+        color:white;
+        font-weight:bold;
+        cursor:pointer;
+    ">حسناً</button>
+  </div>
+</div>
 
 <script>
 let wallet=null;
@@ -145,9 +232,21 @@ function checkLevel(){
     level++;
     usdt += cfg.reward;
     speed += 0.01;
-    alert(`🎉 وصلت للمستوى ${level} وحصلت على ${cfg.reward} USDT`);
+
+    update();
+
+    // عرض نافذة التهنئة
+    document.getElementById("modalTitle").textContent = `🎉 تهانينا!`;
+    document.getElementById("modalMsg").textContent = 
+      `لقد وصلت للمستوى ${level} وحصلت على ${cfg.reward} USDT كمكافأة!`;
+    document.getElementById("levelModal").style.display = "flex";
   }
 }
+
+// إغلاق نافذة التهنئة
+document.getElementById("closeModal").onclick = ()=>{
+  document.getElementById("levelModal").style.display = "none";
+};
 
 function update(){
   document.getElementById("usdt").textContent = usdt.toFixed(2);
