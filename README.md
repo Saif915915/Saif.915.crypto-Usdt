@@ -1,184 +1,174 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>موقع تعدين – لعبة</title>
+<meta charset="UTF-8">
+<title>لعبة تعدين USDT</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      direction: rtl;
-      margin: 0;
-      padding: 0;
+<style>
+body {
+  font-family: Arial, sans-serif;
+  direction: rtl;
+  margin: 0;
+  background:
+    linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
+    radial-gradient(circle at bottom, #ff8c00, #b22222, #2b1b0e);
+  min-height: 100vh;
+}
 
-      /* خلفية ستايل Red Dead */
-      background:
-        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
-        radial-gradient(circle at bottom, #ff8c00, #b22222, #2b1b0e);
+header {
+  background: rgba(20,40,80,.85);
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
 
-      background-attachment: fixed;
-      min-height: 100vh;
-    }
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
 
-    header {
-      background: rgba(20, 40, 80, 0.85);
-      color: white;
-      padding: 20px;
-      text-align: center;
-      backdrop-filter: blur(6px);
-    }
+.box {
+  background: rgba(255,255,255,.9);
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+}
 
-    nav ul {
-      list-style: none;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
+button {
+  padding: 12px 25px;
+  margin: 6px;
+  border: none;
+  border-radius: 8px;
+  background: #1e90ff;
+  color: white;
+  cursor: pointer;
+}
 
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
+#mineBtn {
+  background: #c45a00;
+  font-size: 18px;
+}
 
-    main {
-      padding: 20px;
-      max-width: 900px;
-      margin: auto;
-    }
-
-    .dashboard, .game, .info {
-      background: rgba(255, 255, 255, 0.88);
-      padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
-
-    h2 {
-      margin-top: 0;
-      text-align: center;
-    }
-
-    button {
-      padding: 12px 22px;
-      margin: 10px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      background-color: #1e90ff;
-      color: white;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background-color: #0f6fc5;
-    }
-
-    .game {
-      background: rgba(255, 230, 150, 0.9);
-      text-align: center;
-    }
-
-    #mineButton {
-      background-color: #c45a00;
-      font-size: 18px;
-      padding: 15px 35px;
-    }
-
-    #mineButton:hover {
-      background-color: #9e4500;
-    }
-
-    footer {
-      background: rgba(0,0,0,0.6);
-      color: white;
-      text-align: center;
-      padding: 15px;
-      margin-top: 30px;
-    }
-  </style>
+footer {
+  background: rgba(0,0,0,.6);
+  color: white;
+  text-align: center;
+  padding: 15px;
+}
+</style>
 </head>
 
 <body>
 
 <header>
-  <h1>موقع التعدين</h1>
-  <nav>
-    <ul>
-      <li><a href="#">الرئيسية</a></li>
-      <li><a href="#">لوحة التحكم</a></li>
-      <li><a href="#">اللعبة</a></li>
-    </ul>
-  </nav>
+<h1>🎮 لعبة تعدين USDT</h1>
 </header>
 
 <main>
 
-  <!-- لوحة التحكم -->
-  <section class="dashboard">
-    <h2>لوحة التحكم</h2>
-    <p>قوة التعدين: <strong><span id="hashRate">0</span> H/s</strong></p>
-    <p>العملات المكتسبة: <strong><span id="coins">0</span></strong></p>
-    <button id="startMining">بدء التعدين</button>
-    <button id="stopMining">إيقاف التعدين</button>
-  </section>
+<div class="box">
+<h2>🔐 المحفظة</h2>
+<p id="wallet">غير متصل</p>
+<button id="connect">ربط MetaMask</button>
+</div>
 
-  <!-- معلومات -->
-  <section class="info">
-    <h2>كيف يعمل الموقع</h2>
-    <p>
-      هذا نموذج لعبة تعدين تفاعلية.  
-      التعدين هنا تعليمي وتجريبي على شكل لعبة.
-    </p>
-  </section>
+<div class="box">
+<h2>📊 مستواك</h2>
+<p>المستوى: <strong><span id="level">1</span></strong></p>
+<p>USDT: <strong><span id="usdt">0</span></strong></p>
+<p>الهدف القادم: <span id="target">5</span> USDT</p>
+</div>
 
-  <!-- لعبة التعدين -->
-  <section class="game">
-    <h2>🎮 لعبة التعدين</h2>
-    <p>العملات المكتسبة: <strong><span id="gameCoins">0</span></strong></p>
-    <button id="mineButton">⛏ اضغط للتعدين</button>
-  </section>
+<div class="box">
+<h2>⛏ التعدين التلقائي</h2>
+<p>السرعة: <span id="speed">0.02</span> USDT / ثانية</p>
+<button id="start">بدء</button>
+<button id="stop">إيقاف</button>
+</div>
+
+<div class="box">
+<h2>🎮 لعبة التعدين</h2>
+<button id="mineBtn">⛏ اضغط للتعدين</button>
+</div>
 
 </main>
 
 <footer>
-  حقوق النشر © 2026
+USDT افتراضي – مشروع تعليمي
 </footer>
 
 <script>
-  /* التعدين التلقائي */
-  let mining = false;
-  let hashRate = 0;
-  let coins = 0;
-  let interval;
+let wallet=null;
+let usdt=0;
+let level=1;
+let speed=0.02;
+let interval;
 
-  document.getElementById("startMining").addEventListener("click", () => {
-    if (!mining) {
-      mining = true;
-      interval = setInterval(() => {
-        hashRate = Math.floor(Math.random() * 150) + 50;
-        coins += 0.02;
-        document.getElementById("hashRate").textContent = hashRate;
-        document.getElementById("coins").textContent = coins.toFixed(2);
-      }, 1000);
-    }
-  });
+const levels = [
+  { need: 5, reward: 1 },
+  { need: 15, reward: 2 },
+  { need: 30, reward: 3 },
+  { need: 60, reward: 5 },
+  { need: 100, reward: 8 }
+];
 
-  document.getElementById("stopMining").addEventListener("click", () => {
-    mining = false;
-    clearInterval(interval);
-  });
+document.getElementById("connect").onclick = async ()=>{
+  if(!window.ethereum){ alert("افتح من MetaMask"); return; }
+  const acc = await ethereum.request({method:"eth_requestAccounts"});
+  wallet = acc[0];
+  document.getElementById("wallet").textContent = wallet;
+  load();
+};
 
-  /* لعبة التعدين */
-  let gameCoins = 0;
-  document.getElementById("mineButton").addEventListener("click", () => {
-    gameCoins += 0.1;
-    document.getElementById("gameCoins").textContent = gameCoins.toFixed(2);
-  });
+document.getElementById("start").onclick = ()=>{
+  interval = setInterval(()=>{
+    usdt += speed;
+    checkLevel();
+    update();
+  },1000);
+};
+
+document.getElementById("stop").onclick = ()=> clearInterval(interval);
+
+document.getElementById("mineBtn").onclick = ()=>{
+  usdt += 0.1;
+  checkLevel();
+  update();
+};
+
+function checkLevel(){
+  const cfg = levels[level-1];
+  if(cfg && usdt >= cfg.need){
+    level++;
+    usdt += cfg.reward;
+    speed += 0.01;
+    alert(`🎉 وصلت للمستوى ${level} وحصلت على ${cfg.reward} USDT`);
+  }
+}
+
+function update(){
+  document.getElementById("usdt").textContent = usdt.toFixed(2);
+  document.getElementById("level").textContent = level;
+  document.getElementById("speed").textContent = speed.toFixed(2);
+  document.getElementById("target").textContent =
+    levels[level-1]?.need ?? "MAX";
+
+  if(wallet){
+    localStorage.setItem(wallet, JSON.stringify({usdt,level,speed}));
+  }
+}
+
+function load(){
+  const d = localStorage.getItem(wallet);
+  if(d){
+    const s = JSON.parse(d);
+    usdt=s.usdt; level=s.level; speed=s.speed;
+    update();
+  }
+}
 </script>
 
 </body>
