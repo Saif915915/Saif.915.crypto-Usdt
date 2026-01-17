@@ -83,6 +83,7 @@ button:hover {
   cursor: pointer;
   box-shadow: inset 0 0 20px rgba(0,0,0,.5), 0 6px 15px rgba(0,0,0,.3);
   transition: transform 0.1s;
+  position: relative;
 }
 
 .mine-shaft span {
@@ -91,6 +92,23 @@ button:hover {
 
 .mine-shaft:active span {
   transform: translateY(5px) rotate(-5deg);
+}
+
+/* تأثير رسومي "حفر" */
+.hole {
+  width: 40px;
+  height: 20px;
+  background: #3a261a;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 20px;
+  animation: fall 0.3s ease-out forwards;
+}
+
+@keyframes fall {
+  0% { transform: scale(0.5) translateY(0); opacity: 0.7; }
+  50% { transform: scale(1.2) translateY(10px); opacity: 1; }
+  100% { transform: scale(1) translateY(30px); opacity: 0; }
 }
 
 footer {
@@ -160,17 +178,19 @@ footer {
   </div>
 </div>
 
-<div class="box">
-  <h2>⛏ التعدين التلقائي</h2>
-  <p>السرعة: <span id="speed">0.02</span> USDT / ثانية</p>
-  <button id="start">بدء</button>
-  <button id="stop">إيقاف</button>
-</div>
+<div class="box mining-section">
+  <div id="mineArea" style="flex:1;">
+    <h2>🎮 منجم التعدين</h2>
+    <div id="mineBtn" class="mine-shaft">
+      <span>⛏ احفر هنا!</span>
+    </div>
+  </div>
 
-<div class="box">
-  <h2>🎮 منجم التعدين</h2>
-  <div id="mineBtn" class="mine-shaft">
-    <span>⛏ احفر هنا!</span>
+  <div id="autoArea" style="flex:1;">
+    <h2>⛏ التعدين التلقائي</h2>
+    <p>السرعة: <span id="speed">0.02</span> USDT / ثانية</p>
+    <button id="start">بدء</button>
+    <button id="stop">إيقاف</button>
   </div>
 </div>
 
@@ -183,10 +203,6 @@ footer {
 <footer>
 مشروع تعليمي – لعبة Web3
 </footer>
-
-<!-- أصوات -->
-<audio id="digSound" src="https://www.soundjay.com/mechanical/sounds/pickaxe-hit-1.mp3"></audio>
-<audio id="levelSound" src="https://www.soundjay.com/button/sounds/button-10.mp3"></audio>
 
 <!-- Modal التهنئة -->
 <div id="levelModal" style="
@@ -228,7 +244,7 @@ let wallet=null;
 let usdt=0;
 let level=1;
 let speed=0.02;
-let interval;
+let interval=null; // التأكد من التهيئة
 
 const levels = [
   { need: 5, reward: 1 },
@@ -237,9 +253,6 @@ const levels = [
   { need: 60, reward: 5 },
   { need: 100, reward: 8 }
 ];
-
-const digSound = document.getElementById("digSound");
-const levelSound = document.getElementById("levelSound");
 
 document.getElementById("connect").onclick = async ()=>{
   if(!window.ethereum){ alert("افتح من MetaMask"); return; }
@@ -250,6 +263,7 @@ document.getElementById("connect").onclick = async ()=>{
 };
 
 document.getElementById("start").onclick = ()=>{
+  if(interval) clearInterval(interval);
   interval = setInterval(()=>{
     usdt += speed;
     checkLevel();
@@ -257,12 +271,16 @@ document.getElementById("start").onclick = ()=>{
   },1000);
 };
 
-document.getElementById("stop").onclick = ()=> clearInterval(interval);
+document.getElementById("stop").onclick = ()=>{
+  if(interval){
+    clearInterval(interval);
+    interval = null;
+  }
+};
 
 document.getElementById("mineBtn").onclick = ()=>{
   usdt += 0.1;
-  digSound.currentTime = 0;
-  digSound.play();
+  createHoleEffect();
   checkLevel();
   update();
 };
@@ -281,10 +299,6 @@ function checkLevel(){
     document.getElementById("modalMsg").textContent = 
       `لقد وصلت للمستوى ${level} وحصلت على ${cfg.reward} USDT كمكافأة!`;
     document.getElementById("levelModal").style.display = "flex";
-
-    // صوت الترقية
-    levelSound.currentTime = 0;
-    levelSound.play();
   }
 }
 
@@ -321,6 +335,15 @@ function load(){
     usdt=s.usdt; level=s.level; speed=s.speed;
     update();
   }
+}
+
+// تأثير رسومي "حفر" عند الضغط
+function createHoleEffect(){
+  const mine = document.getElementById("mineBtn");
+  const hole = document.createElement("div");
+  hole.className = "hole";
+  mine.appendChild(hole);
+  setTimeout(()=>{ mine.removeChild(hole); },300);
 }
 </script>
 
