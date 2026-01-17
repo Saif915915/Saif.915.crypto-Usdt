@@ -5,6 +5,9 @@
 <title>لعبة تعدين USDT</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Three.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -12,9 +15,7 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background:
-    linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
-    url('https://i.imgur.com/qyQ1S5r.jpg') no-repeat center center fixed;
+  background: url('https://i.imgur.com/R4y1A4P.jpg') no-repeat center center fixed;
   background-size: cover;
   color: #fff;
 }
@@ -68,57 +69,6 @@ button:hover {
   width: 100px;
 }
 
-.mine-shaft {
-  width: 200px;
-  height: 200px;
-  margin: 20px auto;
-  background: linear-gradient(#6b4f3d, #3a261a);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: #ffd700;
-  cursor: pointer;
-  box-shadow: inset 0 0 20px rgba(0,0,0,.5), 0 6px 15px rgba(0,0,0,.3);
-  transition: transform 0.1s;
-  position: relative;
-}
-
-.mine-shaft span {
-  transition: transform 0.1s;
-}
-
-.mine-shaft:active span {
-  transform: translateY(5px) rotate(-5deg);
-}
-
-/* تأثير رسومي "حفر" */
-.hole {
-  width: 40px;
-  height: 20px;
-  background: #3a261a;
-  border-radius: 50%;
-  position: absolute;
-  bottom: 20px;
-  animation: fall 0.3s ease-out forwards;
-}
-
-@keyframes fall {
-  0% { transform: scale(0.5) translateY(0); opacity: 0.7; }
-  50% { transform: scale(1.2) translateY(10px); opacity: 1; }
-  100% { transform: scale(1) translateY(30px); opacity: 0; }
-}
-
-footer {
-  text-align: center;
-  padding: 15px;
-  background: rgba(0,0,0,.7);
-  font-size: 12px;
-  color: #ccc;
-}
-
 .warning {
   font-size: 13px;
   color: #ff9999;
@@ -126,19 +76,43 @@ footer {
   margin-top: 10px;
 }
 
-.level-bar-container {
-  background:#444;
-  border-radius:8px;
-  height:20px;
-  width:100%;
-  margin-top:10px;
+.level-path {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 15px;
 }
 
-#levelBar {
-  background:#1e90ff;
-  height:100%;
-  width:0%;
-  border-radius:8px;
+.hole {
+  width: 30px;
+  height: 30px;
+  background: #3a261a;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.hole .fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: #1e90ff;
+  transition: width 0.3s ease;
+}
+
+#mine3D {
+  width: 100%;
+  height: 300px;
+  background: transparent;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#levelModal div {
+  animation: pop 0.3s ease-out;
 }
 
 @keyframes pop {
@@ -146,13 +120,8 @@ footer {
   50% { transform: scale(1.2); opacity: 1; }
   100% { transform: scale(1); }
 }
-
-#levelModal div {
-  animation: pop 0.3s ease-out;
-}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -173,17 +142,21 @@ footer {
   <p>USDT: <strong><span id="usdt">0</span></strong></p>
   <p>الهدف القادم: <span id="target">5</span> USDT</p>
 
-  <div class="level-bar-container">
-    <div id="levelBar"></div>
+  <!-- شريط طريق المحافر -->
+  <div class="level-path">
+    <div class="hole"><div class="fill"></div></div>
+    <div class="hole"><div class="fill"></div></div>
+    <div class="hole"><div class="fill"></div></div>
+    <div class="hole"><div class="fill"></div></div>
+    <div class="hole"><div class="fill"></div></div>
   </div>
 </div>
 
 <div class="box mining-section">
   <div id="mineArea" style="flex:1;">
-    <h2>🎮 منجم التعدين</h2>
-    <div id="mineBtn" class="mine-shaft">
-      <span>⛏ احفر هنا!</span>
-    </div>
+    <h2>🎮 منجم التعدين 3D</h2>
+    <canvas id="mine3D"></canvas>
+    <p>اضغط على المنجم لتحصل على USDT!</p>
   </div>
 
   <div id="autoArea" style="flex:1;">
@@ -240,11 +213,12 @@ footer {
 </div>
 
 <script>
+// === متغيرات اللعبة ===
 let wallet=null;
 let usdt=0;
 let level=1;
 let speed=0.02;
-let interval=null; // التأكد من التهيئة
+let interval=null;
 
 const levels = [
   { need: 5, reward: 1 },
@@ -254,6 +228,7 @@ const levels = [
   { need: 100, reward: 8 }
 ];
 
+// === MetaMask ===
 document.getElementById("connect").onclick = async ()=>{
   if(!window.ethereum){ alert("افتح من MetaMask"); return; }
   const acc = await ethereum.request({method:"eth_requestAccounts"});
@@ -262,6 +237,7 @@ document.getElementById("connect").onclick = async ()=>{
   load();
 };
 
+// === التعدين التلقائي ===
 document.getElementById("start").onclick = ()=>{
   if(interval) clearInterval(interval);
   interval = setInterval(()=>{
@@ -278,13 +254,7 @@ document.getElementById("stop").onclick = ()=>{
   }
 };
 
-document.getElementById("mineBtn").onclick = ()=>{
-  usdt += 0.1;
-  createHoleEffect();
-  checkLevel();
-  update();
-};
-
+// === الترقية والتحقق من المستوى ===
 function checkLevel(){
   const cfg = levels[level-1];
   if(cfg && usdt >= cfg.need){
@@ -294,7 +264,6 @@ function checkLevel(){
 
     update();
 
-    // عرض نافذة التهنئة
     document.getElementById("modalTitle").textContent = `🎉 تهانينا!`;
     document.getElementById("modalMsg").textContent = 
       `لقد وصلت للمستوى ${level} وحصلت على ${cfg.reward} USDT كمكافأة!`;
@@ -307,6 +276,7 @@ document.getElementById("closeModal").onclick = ()=>{
   document.getElementById("levelModal").style.display = "none";
 };
 
+// === تحديث البيانات ===
 function update(){
   document.getElementById("usdt").textContent = usdt.toFixed(2);
   document.getElementById("level").textContent = level;
@@ -314,14 +284,15 @@ function update(){
   document.getElementById("target").textContent =
     levels[level-1]?.need ?? "MAX";
 
-  // تحديث شريط تقدم المستوى
+  // تحديث شريط طريق المحافر
+  const holes = document.querySelectorAll('.level-path .hole');
   const cfg = levels[level-1];
-  if(cfg){
-    const percent = Math.min((usdt/cfg.need)*100, 100);
-    document.getElementById("levelBar").style.width = percent + "%";
-  } else {
-    document.getElementById("levelBar").style.width = "100%";
-  }
+  if(!cfg) return;
+  const percent = Math.min((usdt/cfg.need)*100, 100);
+  holes.forEach((hole,i)=>{
+    const part = Math.min(Math.max(percent - i*20, 0), 20) * 5;
+    hole.querySelector('.fill').style.width = part + '%';
+  });
 
   if(wallet){
     localStorage.setItem(wallet, JSON.stringify({usdt,level,speed}));
@@ -337,14 +308,43 @@ function load(){
   }
 }
 
-// تأثير رسومي "حفر" عند الضغط
-function createHoleEffect(){
-  const mine = document.getElementById("mineBtn");
-  const hole = document.createElement("div");
-  hole.className = "hole";
-  mine.appendChild(hole);
-  setTimeout(()=>{ mine.removeChild(hole); },300);
+// === Three.js 3D Mine ===
+const canvas = document.getElementById("mine3D");
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth/canvas.clientHeight,0.1,1000);
+const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+
+// ضوء
+const light = new THREE.DirectionalLight(0xffffff,1);
+light.position.set(5,5,5);
+scene.add(light);
+
+// كائن الحجر
+const geometry = new THREE.DodecahedronGeometry(1,0);
+const material = new THREE.MeshStandardMaterial({color:0x8B4513, roughness:0.7, metalness:0.2});
+const mineRock = new THREE.Mesh(geometry, material);
+scene.add(mineRock);
+
+camera.position.z =5;
+
+// التدوير البسيط
+function animate(){
+  requestAnimationFrame(animate);
+  mineRock.rotation.y += 0.01;
+  renderer.render(scene,camera);
 }
+animate();
+
+// التفاعل عند الضغط
+canvas.addEventListener("click", ()=>{
+  usdt += 0.1;
+  mineRock.scale.set(1.2,1.2,1.2);
+  setTimeout(()=>{ mineRock.scale.set(1,1,1); },100);
+  checkLevel();
+  update();
+});
 </script>
 
 </body>
