@@ -85,9 +85,12 @@ button:hover {
   transition: transform 0.1s;
 }
 
-.mine-shaft:active {
-  transform: translateY(4px);
-  box-shadow: inset 0 0 10px rgba(0,0,0,.7), 0 4px 8px rgba(0,0,0,.3);
+.mine-shaft span {
+  transition: transform 0.1s;
+}
+
+.mine-shaft:active span {
+  transform: translateY(5px) rotate(-5deg);
 }
 
 footer {
@@ -103,6 +106,31 @@ footer {
   color: #ff9999;
   text-align: center;
   margin-top: 10px;
+}
+
+.level-bar-container {
+  background:#444;
+  border-radius:8px;
+  height:20px;
+  width:100%;
+  margin-top:10px;
+}
+
+#levelBar {
+  background:#1e90ff;
+  height:100%;
+  width:0%;
+  border-radius:8px;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+#levelModal div {
+  animation: pop 0.3s ease-out;
 }
 </style>
 </head>
@@ -126,6 +154,10 @@ footer {
   <p>المستوى: <strong><span id="level">1</span></strong></p>
   <p>USDT: <strong><span id="usdt">0</span></strong></p>
   <p>الهدف القادم: <span id="target">5</span> USDT</p>
+
+  <div class="level-bar-container">
+    <div id="levelBar"></div>
+  </div>
 </div>
 
 <div class="box">
@@ -151,6 +183,10 @@ footer {
 <footer>
 مشروع تعليمي – لعبة Web3
 </footer>
+
+<!-- أصوات -->
+<audio id="digSound" src="https://www.soundjay.com/mechanical/sounds/pickaxe-hit-1.mp3"></audio>
+<audio id="levelSound" src="https://www.soundjay.com/button/sounds/button-10.mp3"></audio>
 
 <!-- Modal التهنئة -->
 <div id="levelModal" style="
@@ -202,6 +238,9 @@ const levels = [
   { need: 100, reward: 8 }
 ];
 
+const digSound = document.getElementById("digSound");
+const levelSound = document.getElementById("levelSound");
+
 document.getElementById("connect").onclick = async ()=>{
   if(!window.ethereum){ alert("افتح من MetaMask"); return; }
   const acc = await ethereum.request({method:"eth_requestAccounts"});
@@ -222,6 +261,8 @@ document.getElementById("stop").onclick = ()=> clearInterval(interval);
 
 document.getElementById("mineBtn").onclick = ()=>{
   usdt += 0.1;
+  digSound.currentTime = 0;
+  digSound.play();
   checkLevel();
   update();
 };
@@ -240,6 +281,10 @@ function checkLevel(){
     document.getElementById("modalMsg").textContent = 
       `لقد وصلت للمستوى ${level} وحصلت على ${cfg.reward} USDT كمكافأة!`;
     document.getElementById("levelModal").style.display = "flex";
+
+    // صوت الترقية
+    levelSound.currentTime = 0;
+    levelSound.play();
   }
 }
 
@@ -254,6 +299,15 @@ function update(){
   document.getElementById("speed").textContent = speed.toFixed(2);
   document.getElementById("target").textContent =
     levels[level-1]?.need ?? "MAX";
+
+  // تحديث شريط تقدم المستوى
+  const cfg = levels[level-1];
+  if(cfg){
+    const percent = Math.min((usdt/cfg.need)*100, 100);
+    document.getElementById("levelBar").style.width = percent + "%";
+  } else {
+    document.getElementById("levelBar").style.width = "100%";
+  }
 
   if(wallet){
     localStorage.setItem(wallet, JSON.stringify({usdt,level,speed}));
