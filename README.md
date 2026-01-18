@@ -1,4 +1,4 @@
- 
+<!DOCTYPE html>
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
@@ -82,7 +82,7 @@ input { width: calc(100% - 20px); padding: 10px; margin: 5px 0; border-radius: 6
 
 <!-- نافذة التهنئة -->
 <div id="levelModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:1000;">
-  <div style="background:#222;padding:30px;border-radius:15px;text-align:center;max-width:300px;color:#fff;box-shadow:0 8px 25px rgba(0,0,0,0.6);">
+  <div style="background:#222;padding:30px;border-radius:15px;text-align:center;max-width:300px;color:#fff;box-shadow:0 8px 25px rgba(0,0,0,.6);">
     <h2 id="modalTitle">🎉 تهانينا!</h2>
     <p id="modalMsg">لقد وصلت لمستوى جديد!</p>
     <button id="closeModal" style="padding:10px 20px;margin-top:15px;border:none;border-radius:8px;background:#1e90ff;color:white;font-weight:bold;cursor:pointer;">حسناً</button>
@@ -112,6 +112,7 @@ function login(email,password){
   // تحميل بيانات اللاعب
   usdt=user.usdt; level=user.level; speed=user.speed; currentUserEmail=email;
   update();
+  // عرض اللعبة بعد تسجيل الدخول
   document.getElementById("authBox").style.display="none";
   document.getElementById("playerBox").style.display="block";
   document.getElementById("gameBox").style.display="flex";
