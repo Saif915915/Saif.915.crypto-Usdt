@@ -6,30 +6,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  direction: rtl;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  background: url('https://i.imgur.com/R4y1A4P.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: #fff;
-}
-header { background: rgba(20,40,80,.85); text-align: center; padding: 25px 10px; font-size: 24px; font-weight: bold; }
-main { max-width: 900px; margin: 20px auto; display: flex; flex-direction: column; gap: 20px; }
-.box { background: rgba(0,0,0,.6); padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,.5); }
-h2 { margin-top: 0; color: #ffcc00; font-size: 20px; }
-button { padding: 12px 25px; margin: 6px; border: none; border-radius: 8px; cursor: pointer; background: #1e90ff; color: white; font-weight: bold; transition: 0.2s; }
-button:hover { background: #0f6fc5; }
-.warning { font-size: 13px; color: #ff9999; text-align: center; margin-top: 10px; }
-.level-path { display: flex; gap: 10px; justify-content: space-between; margin-top: 15px; }
-.hole { width: 50px; height: 50px; background: #3a261a; border-radius: 50%; position: relative; overflow: hidden; }
-.hole .fill { position: absolute; left: 0; bottom: 0; width: 0%; height: 100%; background: #1e90ff; transition: width 0.3s ease; }
-#mine3D { width: 100%; height: 300px; background: transparent; border-radius: 15px; cursor: pointer; margin-top: 10px; }
+body { font-family: Arial, sans-serif; direction: rtl; margin:0; padding:0; min-height:100vh; background: url('https://i.imgur.com/R4y1A4P.jpg') no-repeat center center fixed; background-size: cover; color:#fff; }
+header { background: rgba(20,40,80,.85); text-align:center; padding:25px 10px; font-size:24px; font-weight:bold; }
+main { max-width:900px; margin:20px auto; display:flex; flex-direction:column; gap:20px; }
+.box { background: rgba(0,0,0,.6); padding:20px; border-radius:15px; box-shadow: 0 8px 25px rgba(0,0,0,.5); }
+h2 { margin-top:0; color:#ffcc00; font-size:20px; }
+button { padding:12px 25px; margin:6px; border:none; border-radius:8px; cursor:pointer; background:#1e90ff; color:white; font-weight:bold; transition:0.2s; }
+button:hover { background:#0f6fc5; }
+.warning { font-size:13px; color:#ff9999; text-align:center; margin-top:10px; }
+.level-path { display:flex; gap:10px; justify-content:space-between; margin-top:15px; }
+.hole { width:50px; height:50px; background:#3a261a; border-radius:50%; position:relative; overflow:hidden; }
+.hole .fill { position:absolute; left:0; bottom:0; width:0%; height:100%; background:#1e90ff; transition:width 0.3s ease; }
+#mine3D { width:100%; height:300px; background:transparent; border-radius:15px; cursor:pointer; margin-top:10px; }
 #levelModal div { animation: pop 0.3s ease-out; }
-@keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); } }
-input { width: calc(100% - 20px); padding: 10px; margin: 5px 0; border-radius: 6px; border: none; }
+@keyframes pop {0%{transform:scale(0.5);opacity:0;}50%{transform:scale(1.2);opacity:1;}100%{transform:scale(1);}}
+input { width: calc(100% - 20px); padding:10px; margin:5px 0; border-radius:6px; border:none; }
+#menuBtn { position:fixed; top:20px; left:20px; z-index:1000; }
+#homeMenu { display:none; position:fixed; top:60px; left:20px; width:250px; background:rgba(0,0,0,0.8); padding:20px; border-radius:10px; color:white; z-index:1000; }
+#homeMenu hr { border:1px solid #444; margin:10px 0; }
 </style>
 </head>
 <body>
@@ -80,6 +74,21 @@ input { width: calc(100% - 20px); padding: 10px; margin: 5px 0; border-radius: 6
 </main>
 <footer>مشروع تعليمي – لعبة Web3</footer>
 
+<!-- زر القائمة الرئيسية -->
+<button id="menuBtn">☰ الحساب</button>
+
+<!-- قائمة Home Menu -->
+<div id="homeMenu">
+  <h3>🧾 حسابك</h3>
+  <p>البريد: <span id="menuEmail">---</span></p>
+  <p>المستوى: <span id="menuLevel">1</span></p>
+  <p>الرصيد: <span id="menuUSDT">0</span> USDT</p>
+  <p>آخر تسجيل دخول: <span id="menuLastLogin">---</span></p>
+  <hr />
+  <button id="logoutBtn">تسجيل خروج</button>
+  <button id="supportBtn">الدعم الفني</button>
+</div>
+
 <!-- نافذة التهنئة -->
 <div id="levelModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:1000;">
   <div style="background:#222;padding:30px;border-radius:15px;text-align:center;max-width:300px;color:#fff;box-shadow:0 8px 25px rgba(0,0,0,.6);">
@@ -95,11 +104,11 @@ let usdt=0, level=1, speed=0.02, interval=null;
 let currentUserEmail=null;
 const levels = [{need:5,reward:1},{need:15,reward:2},{need:30,reward:3},{need:60,reward:5},{need:100,reward:8}];
 
-// === إدارة الحسابات ===
+// === إدارة الحسابات LocalStorage ===
 function createAccount(email,password){
   if(!email||!password){ alert("الرجاء إدخال الإيميل وكلمة السر"); return; }
   if(localStorage.getItem('user_'+email)){ alert("الحساب موجود مسبقاً"); return; }
-  const data = {password, usdt:0, level:1, speed:0.02};
+  const data = {password, usdt:0, level:1, speed:0.02, createdAt:new Date().toLocaleString()};
   localStorage.setItem('user_'+email, JSON.stringify(data));
   alert("تم إنشاء الحساب!");
 }
@@ -109,10 +118,10 @@ function login(email,password){
   if(!data){ alert("الحساب غير موجود"); return; }
   const user = JSON.parse(data);
   if(user.password!==password){ alert("كلمة السر خاطئة"); return; }
-  // تحميل بيانات اللاعب
   usdt=user.usdt; level=user.level; speed=user.speed; currentUserEmail=email;
+  localStorage.setItem("lastLogin_"+currentUserEmail,new Date().toLocaleString());
   update();
-  // عرض اللعبة بعد تسجيل الدخول
+  updateMenu();
   document.getElementById("authBox").style.display="none";
   document.getElementById("playerBox").style.display="block";
   document.getElementById("gameBox").style.display="flex";
@@ -122,6 +131,7 @@ function saveProgress(){
   if(!currentUserEmail) return;
   const data = {password: document.getElementById('password').value, usdt, level, speed};
   localStorage.setItem('user_'+currentUserEmail, JSON.stringify(data));
+  updateMenu();
 }
 
 // أحداث تسجيل الدخول / إنشاء حساب
@@ -174,7 +184,31 @@ function update(){
   }
 }
 
-// === Three.js 3D Mine مع جزيئات الذهب ===
+// === Home Menu ===
+document.getElementById("menuBtn").onclick = ()=>{
+  const menu = document.getElementById("homeMenu");
+  menu.style.display = menu.style.display==="none" ? "block" : "none";
+}
+function updateMenu(){
+  if(!currentUserEmail) return;
+  document.getElementById("menuEmail").textContent = currentUserEmail;
+  document.getElementById("menuLevel").textContent = level;
+  document.getElementById("menuUSDT").textContent = usdt.toFixed(2);
+  const lastLogin = localStorage.getItem("lastLogin_"+currentUserEmail) || new Date().toLocaleString();
+  document.getElementById("menuLastLogin").textContent = lastLogin;
+}
+document.getElementById("logoutBtn").onclick = ()=>{
+  if(interval){ clearInterval(interval); interval=null; }
+  currentUserEmail=null;
+  usdt=0; level=1; speed=0.02;
+  document.getElementById("authBox").style.display="block";
+  document.getElementById("playerBox").style.display="none";
+  document.getElementById("gameBox").style.display="none";
+  document.getElementById("homeMenu").style.display="none";
+}
+document.getElementById("supportBtn").onclick = ()=> alert("📧 للتواصل: support@yourgame.com");
+
+// === Three.js 3D Mine ===
 const canvas = document.getElementById("mine3D");
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75,canvas.clientWidth/canvas.clientHeight,0.1,1000);
