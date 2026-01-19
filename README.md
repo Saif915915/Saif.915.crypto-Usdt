@@ -2,149 +2,131 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>لعبة تعدين USDT</title>
+<title>لعبة تعدين تعليمية</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  direction: rtl;
+body{
   margin:0;
-  padding:0;
-  min-height:100vh;
-  background: url('https://i.imgur.com/R4y1A4P.jpg') no-repeat center center fixed;
-  background-size: cover;
+  font-family:Arial;
+  direction:rtl;
+  background:#0b1d2a;
   color:#fff;
 }
-header {
-  background: rgba(20,40,80,.85);
+header{
+  background:#123;
+  padding:20px;
   text-align:center;
-  padding:25px;
   font-size:24px;
-  font-weight:bold;
 }
-main {
+main{
   max-width:900px;
   margin:20px auto;
-  display:flex;
-  flex-direction:column;
-  gap:20px;
+  padding:10px;
 }
-.box {
-  background: rgba(0,0,0,.6);
+.box{
+  background:rgba(0,0,0,.6);
   padding:20px;
-  border-radius:15px;
-  box-shadow: 0 8px 25px rgba(0,0,0,.5);
+  border-radius:12px;
+  margin-bottom:20px;
 }
-h2 { margin-top:0; color:#ffcc00; }
-button {
-  padding:12px 25px;
+button{
+  padding:10px 20px;
   border:none;
   border-radius:8px;
   cursor:pointer;
   background:#1e90ff;
-  color:white;
+  color:#fff;
   font-weight:bold;
-  transition:0.2s;
 }
-button:hover { background:#0f6fc5; }
-input {
+button:hover{background:#0d6efd}
+input{
   width:100%;
   padding:10px;
   margin:5px 0;
   border-radius:6px;
   border:none;
 }
-.warning {
-  text-align:center;
-  font-size:13px;
-  color:#ff9999;
+#mine3D{
+  width:100%;
+  height:300px;
+  border-radius:12px;
+  cursor:pointer;
 }
 
-/* ===== العداد المرئي ===== */
-.progress-box {
+/* العداد */
+.progress{
   background:#222;
   border-radius:10px;
   overflow:hidden;
-  margin:10px 0;
-}
-.progress-fill {
   height:18px;
+}
+.progress-fill{
+  height:100%;
   width:0%;
   background:linear-gradient(90deg,#00ffcc,#1e90ff);
-  transition:width 0.3s ease;
+  transition:width .3s;
 }
-.progress-text {
+.warning{
   text-align:center;
   font-size:13px;
-  margin-top:5px;
-}
-
-#mine3D {
-  width:100%;
-  height:300px;
-  border-radius:15px;
-  cursor:pointer;
+  color:#ffaaaa;
 }
 </style>
 </head>
 
 <body>
 
-<header>🎮 لعبة تعدين USDT التعليمية</header>
+<header>🎮 لعبة تعدين تعليمية</header>
 
 <main>
 
-<!-- تسجيل الدخول -->
+<!-- تسجيل -->
 <div class="box" id="authBox">
-  <h2>تسجيل الدخول / إنشاء حساب</h2>
-  <input id="email" type="email" placeholder="البريد الإلكتروني">
+  <h2>تسجيل / إنشاء حساب</h2>
+  <input id="email" placeholder="الإيميل">
   <input id="password" type="password" placeholder="كلمة السر">
-  <button id="loginBtn">تسجيل الدخول</button>
-  <button id="createBtn">إنشاء حساب</button>
+  <button onclick="createAccount()">إنشاء حساب</button>
+  <button onclick="login()">تسجيل دخول</button>
 </div>
 
-<!-- معلومات اللاعب -->
-<div class="box" id="playerBox" style="display:none;">
-  <h2>📊 معلوماتك</h2>
-  <p>المستوى: <strong><span id="level">1</span></strong></p>
-  <p>الرصيد: <strong><span id="usdt">0</span></strong> USDT</p>
-  <p>الهدف القادم: <span id="target">5</span> USDT</p>
+<!-- معلومات -->
+<div class="box" id="playerBox" style="display:none">
+  <p>المستوى: <b id="level">1</b></p>
+  <p>الرصيد: <b id="usdt">0</b> USDT</p>
+  <p>الهدف القادم: <span id="target">5</span></p>
 </div>
 
-<!-- التعدين -->
-<div class="box" id="gameBox" style="display:none;">
-  <h2>⛏ منجم التعدين</h2>
+<!-- اللعبة -->
+<div class="box" id="gameBox" style="display:none">
   <canvas id="mine3D"></canvas>
   <p>اضغط على الصخرة للتعدين اليدوي</p>
 
   <hr>
 
-  <h3>⚙️ التعدين التلقائي</h3>
-  <p>السرعة: <span id="speed">0.02</span> USDT / ثانية</p>
+  <p>سرعة التعدين: <b id="speed">0.02</b> / ثانية</p>
+  <p>قيد التجميع: <b id="pending">0</b></p>
 
-  <p>قيد التجميع: <strong><span id="pending">0</span></strong> USDT</p>
-
-  <div class="progress-box">
+  <div class="progress">
     <div class="progress-fill" id="pendingBar"></div>
   </div>
-  <div class="progress-text">عداد التجميع</div>
 
-  <button id="start">▶️ بدء التعدين</button>
+  <br>
+
+  <button id="start">▶ بدء</button>
   <button id="stop">⏸ إيقاف</button>
-  <button id="collect">📥 تجميع النقاط</button>
+  <button id="collect">📥 تجميع</button>
 </div>
 
-<div class="warning">⚠️ هذه لعبة تعليمية – لا تمثل USDT الحقيقي</div>
+<div class="warning">⚠️ لعبة تعليمية فقط – لا تمثل USDT الحقيقي</div>
 
 </main>
 
 <script>
-// ===== متغيرات =====
+// ================= المتغيرات =================
 let usdt=0, pendingUSDT=0, level=1, speed=0.02;
-let interval=null, autoMining=false;
-let currentUserEmail=null;
+let interval=null, currentUser=null;
 
 const levels=[
   {need:5,reward:1},
@@ -153,57 +135,50 @@ const levels=[
   {need:60,reward:5}
 ];
 
-// ===== الحسابات =====
-function createAccount(email,password){
-  if(!email||!password) return alert("أدخل البيانات");
+// ================= الحسابات =================
+function createAccount(){
+  const email=emailInput.value;
+  const pass=passwordInput.value;
+  if(!email||!pass) return alert("أدخل البيانات");
   if(localStorage.getItem("user_"+email)) return alert("الحساب موجود");
   localStorage.setItem("user_"+email,JSON.stringify({
-    password,
-    usdt:0,
-    pendingUSDT:0,
-    level:1,
-    speed:0.02
+    password:pass, usdt:0, pending:0, level:1, speed:0.02
   }));
   alert("تم إنشاء الحساب");
 }
 
-function login(email,password){
+function login(){
+  const email=emailInput.value;
+  const pass=passwordInput.value;
   const data=localStorage.getItem("user_"+email);
   if(!data) return alert("الحساب غير موجود");
   const user=JSON.parse(data);
-  if(user.password!==password) return alert("كلمة السر خاطئة");
+  if(user.password!==pass) return alert("كلمة السر خاطئة");
 
+  currentUser=email;
   usdt=user.usdt;
-  pendingUSDT=user.pendingUSDT||0;
+  pendingUSDT=user.pending;
   level=user.level;
   speed=user.speed;
-  currentUserEmail=email;
 
-  document.getElementById("authBox").style.display="none";
-  document.getElementById("playerBox").style.display="block";
-  document.getElementById("gameBox").style.display="block";
+  authBox.style.display="none";
+  playerBox.style.display="block";
+  gameBox.style.display="block";
   update();
 }
 
-function saveProgress(){
-  if(!currentUserEmail) return;
-  const user=JSON.parse(localStorage.getItem("user_"+currentUserEmail));
-  localStorage.setItem("user_"+currentUserEmail,JSON.stringify({
-    password:user.password,
-    usdt,
-    pendingUSDT,
-    level,
-    speed
+function save(){
+  if(!currentUser) return;
+  const old=JSON.parse(localStorage.getItem("user_"+currentUser));
+  localStorage.setItem("user_"+currentUser,JSON.stringify({
+    password:old.password,
+    usdt, pending:pendingUSDT, level, speed
   }));
 }
 
-// ===== أزرار =====
-createBtn.onclick=()=>createAccount(email.value,password.value);
-loginBtn.onclick=()=>login(email.value,password.value);
-
+// ================= الأزرار =================
 start.onclick=()=>{
-  if(autoMining) return;
-  autoMining=true;
+  if(interval) return;
   interval=setInterval(()=>{
     pendingUSDT+=speed;
     update();
@@ -211,8 +186,8 @@ start.onclick=()=>{
 };
 
 stop.onclick=()=>{
-  autoMining=false;
   clearInterval(interval);
+  interval=null;
 };
 
 collect.onclick=()=>{
@@ -220,41 +195,48 @@ collect.onclick=()=>{
   usdt+=pendingUSDT;
   pendingUSDT=0;
   checkLevel();
-  saveProgress();
+  save();
   update();
 };
 
-// ===== المستويات =====
+// ================= المستويات =================
 function checkLevel(){
   const cfg=levels[level-1];
   if(cfg && usdt>=cfg.need){
     level++;
     usdt+=cfg.reward;
     speed+=0.01;
-    alert(`🎉 وصلت للمستوى ${level}`);
+    alert("🎉 مستوى جديد!");
   }
 }
 
-// ===== تحديث الواجهة =====
+// ================= التحديث =================
 function update(){
   usdtEl.textContent=usdt.toFixed(2);
-  pending.textContent=pendingUSDT.toFixed(2);
+  pendingEl.textContent=pendingUSDT.toFixed(2);
   levelEl.textContent=level;
   speedEl.textContent=speed.toFixed(2);
-  target.textContent=levels[level-1]?.need||"MAX";
+  targetEl.textContent=levels[level-1]?.need || "MAX";
 
-  const percent=Math.min(pendingUSDT/5*100,100);
+  const percent=Math.min(pendingUSDT/10*100,100);
   pendingBar.style.width=percent+"%";
 }
 
+// ================= العناصر =================
+const emailInput=document.getElementById("email");
+const passwordInput=document.getElementById("password");
+const authBox=document.getElementById("authBox");
+const playerBox=document.getElementById("playerBox");
+const gameBox=document.getElementById("gameBox");
+
 const usdtEl=document.getElementById("usdt");
-const pending=document.getElementById("pending");
-const pendingBar=document.getElementById("pendingBar");
+const pendingEl=document.getElementById("pending");
 const levelEl=document.getElementById("level");
 const speedEl=document.getElementById("speed");
-const target=document.getElementById("target");
+const targetEl=document.getElementById("target");
+const pendingBar=document.getElementById("pendingBar");
 
-// ===== Three.js =====
+// ================= Three.js =================
 const canvas=document.getElementById("mine3D");
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(75,canvas.clientWidth/canvas.clientHeight,0.1,1000);
@@ -280,10 +262,10 @@ function animate(){
 animate();
 
 canvas.onclick=()=>{
-  if(!currentUserEmail) return alert("سجّل دخول");
+  if(!currentUser) return alert("سجّل دخول");
   usdt+=0.1;
   checkLevel();
-  saveProgress();
+  save();
   update();
 };
 </script>
