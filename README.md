@@ -97,6 +97,7 @@ button:active{transform:scale(.95)}
 .progress-fill{
   height:100%;
   background:linear-gradient(90deg,#00ffd5,#1e90ff);
+  box-shadow:0 0 10px rgba(0,255,213,.9);
 }
 
 .shop-item{
@@ -104,6 +105,10 @@ button:active{transform:scale(.95)}
   padding:12px;
   border-radius:14px;
   margin-bottom:10px;
+}
+
+.shop-item small{
+  color:#9fffe9;
 }
 
 input{
@@ -120,6 +125,14 @@ input{
   text-align:center;
   font-size:12px;
   color:#ff9a9a;
+  opacity:.8;
+}
+
+#accountInfo{
+  display:none;
+  padding:10px;
+  text-align:center;
+  font-size:14px;
 }
 </style>
 </head>
@@ -127,6 +140,10 @@ input{
 <body>
 
 <header>⚡ Neon Mining Game</header>
+
+<div id="accountInfo">
+  👤 <b id="userEmail"></b>
+</div>
 
 <main>
 
@@ -206,7 +223,7 @@ function createAccount(){
     usdt:0,pending:0,level:1,speed:0.02,
     clickPower:0.1,speedPrice:5,clickPrice:3
   }));
-  alert("تم");
+  alert("تم إنشاء الحساب");
 }
 
 function login(){
@@ -214,8 +231,12 @@ function login(){
   if(!u||u.pass!==btoa(password.value)) return alert("خطأ");
   currentUser=email.value;
   ({usdt,pending,level,speed,clickPower,speedPrice,clickPrice}=u);
+
   authBox.style.display="none";
   playerBox.style.display=gameBox.style.display=shopBox.style.display="block";
+  document.getElementById("accountInfo").style.display = "block";
+  document.getElementById("userEmail").textContent = currentUser;
+
   update();
 }
 
@@ -229,13 +250,16 @@ function save(){
 setInterval(save,5000);
 
 // ===== أزرار =====
-start.onclick=()=>interval||(
-  interval=setInterval(()=>{pending+=speed;update()},1000)
-);
-stop.onclick=()=>{clearInterval(interval);interval=null};
-collect.onclick=()=>{
+document.getElementById("start").addEventListener("click",()=>{
+  if(interval) return;
+  interval=setInterval(()=>{pending+=speed;update()},1000);
+});
+document.getElementById("stop").addEventListener("click",()=>{
+  clearInterval(interval);interval=null;
+});
+document.getElementById("collect").addEventListener("click",()=>{
   usdt+=pending; pending=0; checkLevel(); update();
-};
+});
 
 // ===== متجر =====
 function buySpeed(){
